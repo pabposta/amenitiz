@@ -11,6 +11,26 @@ RSpec.describe 'HomePromptState' do
   let(:prompt_state) { HomePromptState.new(basket:) }
   subject(:next_prompt_state) { PromptState.new(basket:) }
 
+  describe '#next_state_from_choice' do
+    it "returns ScanPromptState for 'Scan'" do
+      expect(prompt_state.send(:next_state_from_choice, choice: 'Scan').class).to eq(ScanPromptState)
+    end
+
+    it "returns RemovePromptState for 'Remove'" do
+      expect(prompt_state.send(:next_state_from_choice, choice: 'Remove').class).to eq(RemovePromptState)
+    end
+
+    it "returns ExitPromptState for 'Exit'" do
+      expect(prompt_state.send(:next_state_from_choice, choice: 'Exit').class).to eq(ExitPromptState)
+    end
+
+    it 'raises en error for an invalid choice' do
+      expect do
+        prompt_state.send(:next_state_from_choice, choice: 'Invalid')
+      end.to raise_error(ArgumentError, 'Invalid is not a valid choice')
+    end
+  end
+
   describe '#prompt' do
     let(:prompt) { instance_double(TTY::Prompt) }
 

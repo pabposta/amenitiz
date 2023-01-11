@@ -43,7 +43,16 @@ class HomePromptState < PromptState
 
   sig { params(choice: String).returns(PromptState) }
   def next_state_from_choice(choice:)
-    self
+    case choice
+    when 'Scan'
+      ScanPromptState.new(basket: @basket)
+    when 'Remove'
+      RemovePromptState.new(basket: @basket)
+    when 'Exit'
+      ExitPromptState.new
+    else
+      raise ArgumentError, "#{choice} is not a valid choice"
+    end
   end
 end
 
