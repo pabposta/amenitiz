@@ -22,6 +22,6 @@ class PricingService
     price = item.price
     discount = @discounts_by_item_code[item.code]
     price = discount.apply(original_price_per_unit: price, quantity:) if discount
-    price * quantity
+    (price * quantity).round(2)
   end
 end

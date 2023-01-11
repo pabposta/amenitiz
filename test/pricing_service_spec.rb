@@ -41,5 +41,17 @@ RSpec.describe PricingService do
                                                    quantity: 2)).to eq(6.0)
       end
     end
+
+    subject(:pricing_service) do
+      datastore_adapter = instance_double(DatastoreAdapter, discounts: [])
+      discount_factory = instance_double(DiscountFactory)
+      PricingService.new(datastore_adapter:,
+                         discount_factory:)
+    end
+
+    it 'rounds the result to two decimals' do
+      expect(item).to receive(:price).and_return(1.1111)
+      expect(pricing_service.calculate_line_item(item:, quantity: 2)).to eq(2.22)
+    end
   end
 end
