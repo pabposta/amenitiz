@@ -55,4 +55,11 @@ RSpec.describe 'UserInterface' do
       end
     end
   end
+
+  describe '#run' do
+    it 'shows the basket' do
+      expect(user_interface).to receive(:show_basket)
+      user_interface.run
+    end
+  end
 end

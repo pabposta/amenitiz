@@ -25,6 +25,11 @@ class UserInterface
     puts(table.render(:ascii))
   end
 
+  sig { void }
+  def run
+    show_basket
+  end
+
   protected
 
   sig { params(line_items: T::Array[LineItem]).returns(TTY::Table) }
