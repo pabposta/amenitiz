@@ -46,3 +46,17 @@ RSpec.describe BuyXGetYFreeDiscount do
     end
   end
 end
+
+RSpec.describe FixedPriceBulkDiscount do
+  subject(:discount) { FixedPriceBulkDiscount.new(buy: 3, discounted_price: 3.0) }
+
+  describe '#apply' do
+    it 'applies a discount when a bulk quantity is reached' do
+      expect(discount.apply(original_price_per_unit: 5.0, quantity: 3)).to eq(3.0)
+    end
+
+    it 'does not apply a discount when a bulk quantity is not reached' do
+      expect(discount.apply(original_price_per_unit: 5.0, quantity: 2)).to eq(5.0)
+    end
+  end
+end

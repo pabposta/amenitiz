@@ -39,3 +39,19 @@ class BuyXGetYFreeDiscount
     discounted_total_price / quantity
   end
 end
+
+class FixedPriceBulkDiscount
+  include Discount
+  extend T::Sig
+
+  sig { params(buy: Integer, discounted_price: Float).void }
+  def initialize(buy:, discounted_price:)
+    @buy = buy.to_i
+    @discounted_price = discounted_price.to_f
+  end
+
+  sig { override.params(original_price_per_unit: Float, quantity: Integer).returns(Float) }
+  def apply(original_price_per_unit:, quantity:)
+    quantity >= @buy ? @discounted_price : original_price_per_unit
+  end
+end
