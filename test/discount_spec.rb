@@ -60,3 +60,17 @@ RSpec.describe FixedPriceBulkDiscount do
     end
   end
 end
+
+RSpec.describe FractionPriceBulkDiscount do
+  subject(:discount) { FractionPriceBulkDiscount.new(buy: 3, new_price_fraction: 2 / 3.0) }
+
+  describe '#apply' do
+    it 'applies a discount when a bulk quantity is reached' do
+      expect(discount.apply(original_price_per_unit: 6.0, quantity: 3)).to eq(4.0)
+    end
+
+    it 'does not apply a discount when a bulk quantity is not reached' do
+      expect(discount.apply(original_price_per_unit: 5.0, quantity: 2)).to eq(5.0)
+    end
+  end
+end

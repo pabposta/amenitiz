@@ -55,3 +55,19 @@ class FixedPriceBulkDiscount
     quantity >= @buy ? @discounted_price : original_price_per_unit
   end
 end
+
+class FractionPriceBulkDiscount
+  include Discount
+  extend T::Sig
+
+  sig { params(buy: Integer, new_price_fraction: Float).void }
+  def initialize(buy:, new_price_fraction:)
+    @buy = buy.to_i
+    @new_price_fraction = new_price_fraction.to_f
+  end
+
+  sig { override.params(original_price_per_unit: Float, quantity: Integer).returns(Float) }
+  def apply(original_price_per_unit:, quantity:)
+    quantity >= @buy ? original_price_per_unit * @new_price_fraction : original_price_per_unit
+  end
+end
