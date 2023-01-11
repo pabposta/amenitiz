@@ -59,5 +59,7 @@ class Basket
   end
 
   sig { returns(Float) }
-  def total_discounted_price; end
+  def total_discounted_price
+    @pricing_service.total_discounted_price(line_items: @line_items_by_code.values)
+  end
 end

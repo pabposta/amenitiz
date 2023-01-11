@@ -81,6 +81,23 @@ RSpec.describe Basket do
 
   describe '#total_discounted_price' do
     it 'returns the total discounted price of the basket' do
+      expect(item_service).to receive(:item).with({ item_code: 'ITM1' }).and_return(item1)
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item1,
+                                                                      quantity: 1 }).and_return(1.50)
+      basket.add_item(item_code: 'ITM1')
+      expect(item_service).to receive(:item).with({ item_code: 'ITM2' }).and_return(item2)
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item2,
+                                                                      quantity: 1 }).and_return(2.50)
+      basket.add_item(item_code: 'ITM2')
+      expect(pricing_service).to receive(:total_discounted_price).with({
+                                                                         line_items: [
+                                                                           LineItem.new(item: item1, count: 1,
+                                                                                        total_discounted_price: 1.50),
+                                                                           LineItem.new(item: item2, count: 1,
+                                                                                        total_discounted_price: 2.50)
+                                                                         ]
+                                                                       }).and_return(4.00)
+      expect(basket.total_discounted_price).to eq(4.00)
     end
   end
 end
