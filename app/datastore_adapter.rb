@@ -4,9 +4,15 @@
 require 'sorbet-runtime'
 require_relative 'item'
 
+# This class is responsible for interacting with a data store. In this case it is hardcoded, but using the interface,
+# it could easily be used to get the data from other sources, like a file or a database. In this case, it could be for
+# example a CsvDatastoreAdapter, or MysqlDatastoreAdatper, etc. It could also be split to get the items from one source
+# and the discounts from another. This way, the main program is decoupled from the data source.
+# The adapter allows to get items and discounts from the store.
 class DatastoreAdapter
   extend T::Sig
 
+  # Returns a hard-coded list of items (the ones from the test data example)
   sig { returns(T::Array[Item]) }
   def items
     [
@@ -16,6 +22,7 @@ class DatastoreAdapter
     ]
   end
 
+  # Returns a hard-coded list of discounts (the ones from the task desciption)
   sig { returns(T::Array[T::Hash[Symbol, T.any(String, T::Hash[Symbol, T.any(Integer, Float)])]]) }
   def discounts
     [
