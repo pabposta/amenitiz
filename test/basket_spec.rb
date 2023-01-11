@@ -33,9 +33,20 @@ RSpec.describe Basket do
 
   describe '#remove_item' do
     it 'allows to delete items' do
+      expect(item_service).to receive(:item).with({ item_code: 'ITM1' }).and_return(item1)
+      basket.add_item(item_code: 'ITM1')
+      basket.add_item(item_code: 'ITM1')
+      expect(item_service).to receive(:item).with({ item_code: 'ITM2' }).and_return(item2)
+      basket.add_item(item_code: 'ITM2')
+      basket.remove_item(item_code: 'ITM1')
+      basket.remove_item(item_code: 'ITM2')
+      expect(basket.line_items).to eq([
+                                        LineItem.new(item: item1, count: 1, total_discounted_price: 0.0)
+                                      ])
     end
 
     it 'raises an error when trying to remove an item that is not in the basket' do
+      expect { basket.remove_item(item_code: 'ITM0') }.to raise_error('Item code ITM0 is not in basket')
     end
   end
 

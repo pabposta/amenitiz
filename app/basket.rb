@@ -28,7 +28,19 @@ class Basket
   end
 
   sig { params(item_code: String).void }
-  def remove_item(item_code:); end
+  def remove_item(item_code:)
+    raise ArgumentError, "Item code #{item_code} is not in basket" unless @line_items_by_code.include?(item_code)
+
+    if @line_items_by_code[item_code].count > 1
+      # if there is more than one item, decrease its count
+      line_item = @line_items_by_code[item_code]
+      line_item.count -= 1
+      line_item.total_discounted_price = 0.0
+    else
+      # otherwise, if the item is the only unit left, delete it completely
+      @line_items_by_code.delete(item_code)
+    end
+  end
 
   sig { returns(T::Array[LineItem]) }
   def line_items
