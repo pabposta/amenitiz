@@ -74,3 +74,155 @@ RSpec.describe FractionPriceBulkDiscount do
     end
   end
 end
+
+RSpec.describe DiscountFactory do
+  subject(:discount_factory) { DiscountFactory.new }
+
+  describe '#create_discount' do
+    context 'when the name is for BuyXGetYFreeDiscount' do
+      let(:name) { 'buy_x_get_y_free' }
+
+      it 'creates the discount when the parameters are valid' do
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 3,
+            get_free: 2
+          }
+        }
+        expect(BuyXGetYFreeDiscount).to receive(:new).with(buy: 3, get_free: 2).and_call_original
+        discount_factory.create_discount(discount_definition:)
+      end
+
+      it 'raises an error when the parameters are invalid' do
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 'invalid',
+            get_free: 2
+          }
+        }
+        expect do
+          discount_factory.create_discount(discount_definition:)
+        end.to raise_error(ArgumentError,
+                           'The parameters buy: invalid, get_free: 2 for BuyXGetYFreeDiscount are not valid')
+
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 1
+          }
+        }
+        expect do
+          discount_factory.create_discount(discount_definition:)
+        end.to raise_error(ArgumentError,
+                           'The parameters buy: 1, get_free: nil for BuyXGetYFreeDiscount are not valid')
+      end
+    end
+
+    context 'when the name is for FixedPriceBulkDiscount' do
+      let(:name) { 'fixed_price_bulk' }
+
+      it 'creates the discount when the parameters are valid' do
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 3,
+            discounted_price: 2.0
+          }
+        }
+        expect(FixedPriceBulkDiscount).to receive(:new).with(buy: 3, discounted_price: 2.0).and_call_original
+        discount_factory.create_discount(discount_definition:)
+      end
+
+      it 'raises an error when the parameters are invalid' do
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 'invalid',
+            discounted_price: 2.0
+          }
+        }
+        expect do
+          discount_factory.create_discount(discount_definition:)
+        end.to raise_error(ArgumentError,
+                           'The parameters buy: invalid, discounted_price: 2.0 '\
+                           'for FixedPriceBulkDiscount are not valid')
+
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 1
+          }
+        }
+        expect do
+          discount_factory.create_discount(discount_definition:)
+        end.to raise_error(ArgumentError,
+                           'The parameters buy: 1, discounted_price: nil '\
+                           'for FixedPriceBulkDiscount are not valid')
+      end
+    end
+
+    context 'when the name is for FractionPriceBulkDiscount' do
+      let(:name) { 'fraction_price_bulk' }
+
+      it 'creates the discount when the parameters are valid' do
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 3,
+            new_price_fraction: 0.5
+          }
+        }
+        expect(FractionPriceBulkDiscount).to receive(:new).with(buy: 3,
+                                                                new_price_fraction: 0.5).and_call_original
+        discount_factory.create_discount(discount_definition:)
+      end
+
+      it 'raises an error when the parameters are invalid' do
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 'invalid',
+            new_price_fraction: 0.5
+          }
+        }
+        expect do
+          discount_factory.create_discount(discount_definition:)
+        end.to raise_error(ArgumentError,
+                           'The parameters buy: invalid, new_price_fraction: 0.5 '\
+                           'for FractionPriceBulkDiscount are not valid')
+
+        discount_definition = {
+          name:,
+          parameters: {
+            buy: 1
+          }
+        }
+        expect do
+          discount_factory.create_discount(discount_definition:)
+        end.to raise_error(ArgumentError,
+                           'The parameters buy: 1, new_price_fraction: nil '\
+                           'for FractionPriceBulkDiscount are not valid')
+      end
+    end
+
+    context 'when the name is invalid' do
+      it 'raises an error when there is no name' do
+        discount_definition = {}
+        expect do
+          discount_factory.create_discount(discount_definition:)
+        end.to raise_error(ArgumentError, 'A discount name is required')
+      end
+
+      it 'raises an error when there the name references no existing discount' do
+        discount_definition = {
+          name: 'invalid'
+        }
+        expect do
+          discount_factory.create_discount(discount_definition:)
+        end.to raise_error(ArgumentError, 'The name invalid is not a valid discount type')
+      end
+    end
+  end
+end

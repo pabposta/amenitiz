@@ -71,3 +71,80 @@ class FractionPriceBulkDiscount
     quantity >= @buy ? original_price_per_unit * @new_price_fraction : original_price_per_unit
   end
 end
+
+class DiscountFactory
+  extend T::Sig
+
+  sig do
+    params(discount_definition: T::Hash[Symbol,
+                                        T.any(String, T::Hash[Symbol, T.any(Integer, Float)])]).returns(Discount)
+  end
+  def create_discount(discount_definition:)
+    name = discount_definition[:name]
+    discount_parameters = T.cast(discount_definition.fetch(:parameters, {}), T::Hash[Symbol, T.untyped])
+    case name
+    when 'buy_x_get_y_free'
+      create_buy_x_get_y_free_discount(discount_parameters:)
+    when 'fixed_price_bulk'
+      create_fixed_price_bulk_discount(discount_parameters:)
+    when 'fraction_price_bulk'
+      create_fraction_price_bulk_discount(discount_parameters:)
+    when nil
+      raise ArgumentError, 'A discount name is required'
+    else
+      raise ArgumentError, "The name #{name} is not a valid discount type"
+    end
+  end
+
+  protected
+
+  sig do
+    params(parameter_pairs: T::Array[T::Array[T.any(String, Integer, Float, NilClass)]], cls: Class).returns(T.noreturn)
+  end
+  def raise_invalid_parameter_error(parameter_pairs:, cls:)
+    parameter_string = parameter_pairs.map do |name, value|
+      "#{name}: #{value.nil? ? 'nil' : value}"
+    end.join(', ')
+    raise ArgumentError, "The parameters #{parameter_string} for #{cls.name} are not valid"
+  end
+
+  sig { params(discount_parameters: T::Hash[Symbol, T.untyped]).returns(BuyXGetYFreeDiscount) }
+  def create_buy_x_get_y_free_discount(discount_parameters:)
+    buy = discount_parameters[:buy]
+    get_free = discount_parameters[:get_free]
+    if buy.class != Integer || get_free.class != Integer
+      raise_invalid_parameter_error(
+        parameter_pairs: [[:buy, buy], [:get_free, get_free]],
+        cls: BuyXGetYFreeDiscount
+      )
+    end
+    BuyXGetYFreeDiscount.new(buy:, get_free:)
+  end
+
+  sig { params(discount_parameters: T::Hash[Symbol, T.untyped]).returns(FixedPriceBulkDiscount) }
+  def create_fixed_price_bulk_discount(discount_parameters:)
+    buy = discount_parameters[:buy]
+    discounted_price = discount_parameters[:discounted_price]
+    if buy.class != Integer || discounted_price.class != Float
+      raise_invalid_parameter_error(
+        parameter_pairs: [[:buy, buy], [:discounted_price, discounted_price]],
+        cls: FixedPriceBulkDiscount
+      )
+    end
+    FixedPriceBulkDiscount.new(buy:, discounted_price:)
+  end
+
+  # Create a FractionPriceBulkDiscount
+  sig { params(discount_parameters: T::Hash[Symbol, T.untyped]).returns(FractionPriceBulkDiscount) }
+  def create_fraction_price_bulk_discount(discount_parameters:)
+    buy = discount_parameters[:buy]
+    new_price_fraction = discount_parameters[:new_price_fraction]
+    if buy.class != Integer || new_price_fraction.class != Float
+      raise_invalid_parameter_error(
+        parameter_pairs: [[:buy, buy], [:new_price_fraction, new_price_fraction]],
+        cls: FractionPriceBulkDiscount
+      )
+    end
+    FractionPriceBulkDiscount.new(buy:, new_price_fraction:)
+  end
+end
