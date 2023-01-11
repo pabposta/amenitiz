@@ -30,6 +30,8 @@ class UserInterface
   sig { void }
   def run
     until @prompt_state.exit?
+      print(TTY::Cursor.clear_screen)
+      print(TTY::Cursor.move_to(0, 0))
       show_basket
       @prompt_state = @prompt_state.prompt
     end

@@ -58,17 +58,31 @@ RSpec.describe 'UserInterface' do
   end
 
   describe '#run' do
+    let(:cursor) { instance_double(TTY::Cursor) }
     let(:next_prompt_state) { instance_double(PromptState, exit?: false) }
     let(:last_prompt_state) { instance_double(PromptState, exit?: true) }
 
+    before do
+      allow(user_interface).to receive(:show_basket)
+      allow(initial_prompt_state).to receive(:prompt).and_return(last_prompt_state)
+      allow(TTY::Cursor).to receive(:clear_screen)
+      allow(TTY::Cursor).to receive(:move_to)
+    end
+
+    it 'clears the screen' do
+      clear_screen_string = 'clear_screen'
+      move_string = 'move'
+      expect(TTY::Cursor).to receive(:clear_screen).and_return(clear_screen_string)
+      expect(TTY::Cursor).to receive(:move_to).with(0, 0).and_return(move_string)
+      expect { user_interface.run }.to output(clear_screen_string + move_string).to_stdout
+    end
+
     it 'shows the basket' do
       expect(user_interface).to receive(:show_basket)
-      allow(initial_prompt_state).to receive(:prompt).and_return(last_prompt_state)
       user_interface.run
     end
 
     it 'shows a prompt' do
-      allow(user_interface).to receive(:show_basket)
       expect(initial_prompt_state).to receive(:prompt).and_return(last_prompt_state)
       user_interface.run
     end
