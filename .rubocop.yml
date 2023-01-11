@@ -1,0 +1,15 @@
+Metrics/BlockLength:
+  IgnoredMethods: ['describe', 'context']
+
+Lint/MissingSuper:
+  Exclude:
+    - app/prompt_state.rb
+
+Metrics/MethodLength:
+  Exclude:
+    - app/discount.rb
+    - app/user_interface.rb
+
+Metrics/AbcSize:
+  Exclude:
+    - app/user_interface.rb
