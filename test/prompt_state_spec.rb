@@ -143,3 +143,13 @@ RSpec.describe 'RemovePromptState' do
     end
   end
 end
+
+RSpec.describe 'ExitPromptState' do
+  subject(:prompt_state) { ExitPromptState.new }
+
+  describe '#exit?' do
+    it 'returns true' do
+      expect(prompt_state.exit?).to eq(true)
+    end
+  end
+end

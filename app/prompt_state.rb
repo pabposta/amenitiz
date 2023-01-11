@@ -77,3 +77,17 @@ class RemovePromptState < PromptState
     HomePromptState.new(basket: @basket)
   end
 end
+
+class ExitPromptState < PromptState
+  def initialize; end
+
+  sig { override.returns(PromptState) }
+  def prompt
+    self
+  end
+
+  sig { override.returns(T::Boolean) }
+  def exit?
+    true
+  end
+end
