@@ -1,15 +1,19 @@
 # frozen_string_literal: true
 # typed: true
 
-require_relative 'item_service'
-
 require 'sorbet-runtime'
+require_relative 'item_service'
+require_relative 'line_item'
+require_relative 'pricing_service'
+
 class Basket
   extend T::Sig
+  attr_accessor :item_service
 
-  sig { params(item_service: ItemService).void }
-  def initialize(item_service:)
+  sig { params(item_service: ItemService, pricing_service: PricingService).void }
+  def initialize(item_service:, pricing_service:)
     @item_service = item_service
+    @pricing_service = pricing_service
     @line_items_by_code = {}
   end
 
@@ -24,7 +28,8 @@ class Basket
     end
     line_item = @line_items_by_code[item_code]
     line_item.count += 1
-    line_item.total_discounted_price = 0.0
+    line_item.total_discounted_price = @pricing_service.calculate_line_item(item: line_item.item,
+                                                                            quantity: line_item.count)
   end
 
   sig { params(item_code: String).void }
@@ -35,7 +40,8 @@ class Basket
       # if there is more than one item, decrease its count
       line_item = @line_items_by_code[item_code]
       line_item.count -= 1
-      line_item.total_discounted_price = 0.0
+      line_item.total_discounted_price = @pricing_service.calculate_line_item(item: line_item.item,
+                                                                              quantity: line_item.count)
     else
       # otherwise, if the item is the only unit left, delete it completely
       @line_items_by_code.delete(item_code)

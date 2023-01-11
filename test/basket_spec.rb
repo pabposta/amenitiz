@@ -10,18 +10,25 @@ RSpec.describe Basket do
   let(:item1) { instance_double(Item, code: 'ITM1') }
   let(:item2) { instance_double(Item, code: 'ITM2') }
   let(:item_service) { instance_double(ItemService, exists?: true) }
-  subject(:basket) { Basket.new(item_service:) }
+  let(:pricing_service) { instance_double(PricingService, calculate_line_item: 0.0) }
+  subject(:basket) { Basket.new(item_service:, pricing_service:) }
 
   describe '#add_item' do
-    it 'allows to add items' do
+    it 'allows to add items and calculates the line price' do
       expect(item_service).to receive(:item).with({ item_code: 'ITM1' }).and_return(item1)
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item1,
+                                                                      quantity: 1 }).and_return(1.50)
       basket.add_item(item_code: 'ITM1')
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item1,
+                                                                      quantity: 2 }).and_return(3.00)
       basket.add_item(item_code: 'ITM1')
       expect(item_service).to receive(:item).with({ item_code: 'ITM2' }).and_return(item2)
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item2,
+                                                                      quantity: 1 }).and_return(4.11)
       basket.add_item(item_code: 'ITM2')
       expect(basket.line_items).to eq([
-                                        LineItem.new(item: item1, count: 2, total_discounted_price: 0.0),
-                                        LineItem.new(item: item2, count: 1, total_discounted_price: 0.0)
+                                        LineItem.new(item: item1, count: 2, total_discounted_price: 3.0),
+                                        LineItem.new(item: item2, count: 1, total_discounted_price: 4.11)
                                       ])
     end
 
@@ -32,16 +39,25 @@ RSpec.describe Basket do
   end
 
   describe '#remove_item' do
-    it 'allows to delete items' do
+    it 'allows to delete items and calculates the line price' do
       expect(item_service).to receive(:item).with({ item_code: 'ITM1' }).and_return(item1)
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item1,
+                                                                      quantity: 1 }).and_return(1.50)
       basket.add_item(item_code: 'ITM1')
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item1,
+                                                                      quantity: 2 }).and_return(3.00)
       basket.add_item(item_code: 'ITM1')
       expect(item_service).to receive(:item).with({ item_code: 'ITM2' }).and_return(item2)
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item2,
+                                                                      quantity: 1 }).and_return(4.11)
       basket.add_item(item_code: 'ITM2')
+      expect(pricing_service).to receive(:calculate_line_item).with({ item: item1,
+                                                                      quantity: 1 }).and_return(1.50)
       basket.remove_item(item_code: 'ITM1')
+      expect(pricing_service).to_not receive(:calculate_line_item)
       basket.remove_item(item_code: 'ITM2')
       expect(basket.line_items).to eq([
-                                        LineItem.new(item: item1, count: 1, total_discounted_price: 0.0)
+                                        LineItem.new(item: item1, count: 1, total_discounted_price: 1.50)
                                       ])
     end
 
