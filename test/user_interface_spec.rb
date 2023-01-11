@@ -20,7 +20,8 @@ RSpec.describe 'UserInterface' do
       instance_double(LineItem, item: items[1], count: 1, total_discounted_price: 1.44)
     ]
   end
-  subject(:user_interface) { UserInterface.new(basket:) }
+  let(:initial_prompt_state) { instance_double(HomePromptState, exit?: false) }
+  subject(:user_interface) { UserInterface.new(basket:, initial_prompt_state:) }
 
   describe '#show_basket' do
     let(:table) { instance_double(TTY::Table) }
@@ -57,8 +58,25 @@ RSpec.describe 'UserInterface' do
   end
 
   describe '#run' do
+    let(:next_prompt_state) { instance_double(PromptState, exit?: false) }
+    let(:last_prompt_state) { instance_double(PromptState, exit?: true) }
+
     it 'shows the basket' do
       expect(user_interface).to receive(:show_basket)
+      allow(initial_prompt_state).to receive(:prompt).and_return(last_prompt_state)
+      user_interface.run
+    end
+
+    it 'shows a prompt' do
+      allow(user_interface).to receive(:show_basket)
+      expect(initial_prompt_state).to receive(:prompt).and_return(last_prompt_state)
+      user_interface.run
+    end
+
+    it 'runs until the state exits' do
+      expect(user_interface).to receive(:show_basket).twice
+      expect(initial_prompt_state).to receive(:prompt).and_return(next_prompt_state)
+      expect(next_prompt_state).to receive(:prompt).and_return(last_prompt_state)
       user_interface.run
     end
   end

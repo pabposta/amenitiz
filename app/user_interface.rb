@@ -5,13 +5,15 @@ require 'sorbet-runtime'
 require 'tty-cursor'
 require 'tty-table'
 require_relative 'basket'
+require_relative 'prompt_state'
 
 class UserInterface
   extend T::Sig
 
-  sig { params(basket: Basket).void }
-  def initialize(basket:)
+  sig { params(basket: Basket, initial_prompt_state: PromptState).void }
+  def initialize(basket:, initial_prompt_state:)
     @basket = basket
+    @prompt_state = initial_prompt_state
   end
 
   sig { void }
@@ -27,7 +29,10 @@ class UserInterface
 
   sig { void }
   def run
-    show_basket
+    until @prompt_state.exit?
+      show_basket
+      @prompt_state = @prompt_state.prompt
+    end
   end
 
   protected
