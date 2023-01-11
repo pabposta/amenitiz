@@ -9,3 +9,5 @@ gem 'rubocop', '1.43.0', require: false
 gem 'sorbet', '0.5.10616'
 gem 'sorbet-runtime', '0.5.10616'
 gem 'tapioca', '0.10.5'
+gem 'tty-cursor', '0.7.1'
+gem 'tty-table', '0.12.0'
