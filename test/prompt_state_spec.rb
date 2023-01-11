@@ -90,3 +90,56 @@ RSpec.describe 'ScanPromptState' do
     end
   end
 end
+
+RSpec.describe 'RemovePromptState' do
+  let(:basket) { instance_double(Basket) }
+  subject(:prompt_state) { RemovePromptState.new(basket:) }
+
+  describe '#prompt' do
+    let(:items) do
+      [
+        instance_double(Item, code: 'ITM1', name: 'Item 1'),
+        instance_double(Item, code: 'ITM2', name: 'Item 2')
+      ]
+    end
+    let(:line_items) do
+      [
+        instance_double(LineItem, item: items[0]),
+        instance_double(LineItem, item: items[1])
+      ]
+    end
+    let(:choices) do
+      [
+        'Item 1 (ITM1)',
+        'Item 2 (ITM2)',
+        'Cancel'
+      ]
+    end
+    let(:prompt) { instance_double(TTY::Prompt) }
+
+    before do
+      expect(basket).to receive(:line_items).and_return(line_items)
+      expect(TTY::Prompt).to receive(:new).twice.and_return(prompt)
+    end
+
+    it 'allows to remove an item from the list' do
+      expect(prompt).to receive(:select).with('Which item would you like to remove?',
+                                              choices).and_return('Item 1 (ITM1)')
+      expect(basket).to receive(:remove_item).with({ item_code: 'ITM1' })
+      expect(prompt_state.prompt.class).to eq(HomePromptState)
+    end
+
+    it 'allows to cancel' do
+      expect(prompt).to receive(:select).with('Which item would you like to remove?',
+                                              choices).and_return('Cancel')
+      expect(basket).to_not receive(:remove_item)
+      expect(prompt_state.prompt.class).to eq(HomePromptState)
+    end
+  end
+
+  describe '#exit?' do
+    it 'returns false' do
+      expect(prompt_state.exit?).to eq(false)
+    end
+  end
+end

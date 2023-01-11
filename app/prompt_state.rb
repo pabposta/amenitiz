@@ -61,3 +61,19 @@ class ScanPromptState < PromptState
     HomePromptState.new(basket: @basket)
   end
 end
+
+class RemovePromptState < PromptState
+  sig { override.returns(PromptState) }
+  def prompt
+    choices_to_code_map = @basket.line_items.map do |line_item|
+      item = line_item.item
+      ["#{item.name} (#{item.code})", item.code]
+    end.to_h
+    choice = @prompt.select('Which item would you like to remove?', choices_to_code_map.keys.sort.push('Cancel'))
+    if choice != 'Cancel'
+      item_code = choices_to_code_map[choice]
+      @basket.remove_item(item_code:)
+    end
+    HomePromptState.new(basket: @basket)
+  end
+end
