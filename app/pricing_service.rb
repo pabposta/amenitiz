@@ -24,4 +24,9 @@ class PricingService
     price = discount.apply(original_price_per_unit: price, quantity:) if discount
     (price * quantity).round(2)
   end
+
+  sig { params(line_items: T::Array[LineItem]).returns(Float) }
+  def total_discounted_price(line_items:)
+    line_items.map(&:total_discounted_price).sum.to_f.round(2)
+  end
 end

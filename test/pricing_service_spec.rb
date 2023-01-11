@@ -54,4 +54,23 @@ RSpec.describe PricingService do
       expect(pricing_service.calculate_line_item(item:, quantity: 2)).to eq(2.22)
     end
   end
+
+  describe '#total_discounted_price' do
+    subject(:pricing_service) do
+      datastore_adapter = instance_double(DatastoreAdapter, discounts: [])
+      discount_factory = instance_double(DiscountFactory)
+      PricingService.new(datastore_adapter:,
+                         discount_factory:)
+    end
+    it 'returns 0 when there are no line items' do
+      expect(pricing_service.total_discounted_price(line_items: [])).to eq(0.0)
+    end
+
+    it 'returns the sum of the line items' do
+      expect(pricing_service.total_discounted_price(line_items: [
+                                                      instance_double(LineItem, total_discounted_price: 1.50),
+                                                      instance_double(LineItem, total_discounted_price: 2.50)
+                                                    ])).to eq(4.00)
+    end
+  end
 end
